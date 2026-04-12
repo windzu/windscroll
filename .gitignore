@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.astro/
+.vercel/
+.output/
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# editor
+.vscode/
+.idea/
+.DS_Store
+
+# misc
+*.tsbuildinfo

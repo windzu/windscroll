@@ -1,0 +1,111 @@
+---
+import '../styles/global.css';
+import { getEntry } from 'astro:content';
+
+interface Props {
+  title?: string;
+  description?: string;
+  wide?: boolean;
+}
+
+const { title, description, wide = false } = Astro.props;
+
+const cfgEntry = await getEntry('config', 'site');
+const cfg = cfgEntry!.data;
+
+const aboutEntry = await getEntry('pages', 'about');
+const hasAbout = !!aboutEntry;
+
+const pageTitle = title ? `${title} · ${cfg.author}` : cfg.author;
+const metaDescription = description || cfg.bio;
+
+const navMaxWidth = wide ? 'max-w-5xl' : 'max-w-2xl';
+---
+
+<html lang={cfg.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="author" content={cfg.author} />
+    {cfg.keywords.length > 0 && <meta name="keywords" content={cfg.keywords.join(',')} />}
+    {metaDescription && <meta name="description" content={metaDescription} />}
+    {cfg.favicon && <link rel="icon" href={cfg.favicon} />}
+    {cfg.siteUrl && <link rel="canonical" href={new URL(Astro.url.pathname, cfg.siteUrl).toString()} />}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    {cfg.chineseFont === 'songti' && (
+      <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    )}
+    {cfg.chineseFont === 'wenkai' && (
+      <>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+        <link
+          href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.6.0/style.css"
+          rel="stylesheet"
+        />
+      </>
+    )}
+
+    <title>{pageTitle}</title>
+  </head>
+  <body data-theme={cfg.theme} data-zh={cfg.chineseFont}>
+    <nav
+      class:list={[
+        'mx-auto flex items-baseline gap-8 px-6 pt-10 pb-2',
+        navMaxWidth,
+      ]}
+    >
+      <a href="/" class="label hover:text-ink transition-colors">
+        <span class="font-display normal-case text-base tracking-tight text-ink">
+          {cfg.author}
+        </span>
+      </a>
+      <a href="/" class="label hover:text-ink transition-colors">home</a>
+      {hasAbout && (
+        <a href="/about/" class="label hover:text-ink transition-colors">about</a>
+      )}
+      {cfg.github && (
+        <a
+          href={cfg.github}
+          target="_blank"
+          rel="noreferrer"
+          class="label ml-auto hover:text-ink transition-colors"
+        >
+          github ↗
+        </a>
+      )}
+    </nav>
+
+    <slot />
+
+    <footer class:list={['mx-auto mt-32 border-t border-rule px-6 py-12', navMaxWidth]}>
+      <div class="flex flex-wrap items-baseline gap-x-8 gap-y-2">
+        <span class="font-display text-lg text-ink">{cfg.author}</span>
+        <span class="label">© {cfg.since}–{new Date().getFullYear()}</span>
+        <span class="ml-auto label">woven by wind·scroll</span>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted font-ui">
+        {cfg.email && (
+          <a href={`mailto:${cfg.email}`} class="hover:text-ink transition-colors">
+            {cfg.email}
+          </a>
+        )}
+        {cfg.github && (
+          <a href={cfg.github} target="_blank" rel="noreferrer" class="hover:text-ink transition-colors">
+            github
+          </a>
+        )}
+      </div>
+    </footer>
+  </body>
+</html>

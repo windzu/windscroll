@@ -1,0 +1,95 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection, getEntry } from 'astro:content';
+
+const cfg = (await getEntry('config', 'site'))!.data;
+
+const posts = (await getCollection('posts')).sort((a, b) =>
+  (b.data.date ?? '').localeCompare(a.data.date ?? '')
+);
+
+// group posts by year for an editorial archive feel
+const grouped = new Map<string, typeof posts>();
+for (const p of posts) {
+  const year = p.data.date?.slice(0, 4) ?? '—';
+  if (!grouped.has(year)) grouped.set(year, []);
+  grouped.get(year)!.push(p);
+}
+const years = [...grouped.keys()];
+---
+
+<Layout>
+  <main class="mx-auto max-w-2xl px-6">
+    <!-- hero -->
+    <header class="pt-20 pb-16">
+      <h1 class="display text-[clamp(3rem,7vw,5rem)] text-ink">
+        {cfg.author}
+      </h1>
+      {cfg.bio && (
+        <p class="lead mt-6 max-w-lg">
+          {cfg.bio}
+        </p>
+      )}
+      {cfg.greeting && (
+        <p class="label mt-10 text-accent">
+          — {cfg.greeting} —
+        </p>
+      )}
+    </header>
+
+    <div class="rule-dot"></div>
+
+    <!-- writings, grouped by year -->
+    <section class="py-14">
+      <div class="mb-10 flex items-baseline justify-between">
+        <h2 class="label">writings</h2>
+        <span class="label">{posts.length} entries</span>
+      </div>
+
+      <div class="space-y-16">
+        {years.map((year) => (
+          <div class="grid grid-cols-[4rem_1fr] gap-6">
+            <div class="pt-1">
+              <div class="label font-mono-local">{year}</div>
+            </div>
+            <ul class="space-y-8">
+              {grouped.get(year)!.map((post) => (
+                <li>
+                  <a
+                    href={`/posts/${post.id}/`}
+                    class="group block"
+                  >
+                    <div class="flex items-baseline gap-4">
+                      <h3 class="font-display text-xl font-normal text-ink transition-colors group-hover:text-accent leading-snug">
+                        {post.data.title}
+                      </h3>
+                      {post.data.date && (
+                        <time class="ml-auto shrink-0 label font-mono-local">
+                          {post.data.date.slice(5)}
+                        </time>
+                      )}
+                    </div>
+                    {post.data.summary && (
+                      <p class="mt-2 line-clamp-2 font-body text-[15px] leading-relaxed text-muted">
+                        {post.data.summary}
+                      </p>
+                    )}
+                    <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                      {post.data.category && (
+                        <span class="label">{post.data.category}</span>
+                      )}
+                      <span class="label text-faint">{post.data.readingMinutes} min read</span>
+                      {post.data.tags.slice(0, 3).map((tag) => (
+                        <span class="label text-faint">#{tag}</span>
+                      ))}
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  </main>
+</Layout>

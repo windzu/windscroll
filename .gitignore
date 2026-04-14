@@ -1,27 +1,32 @@
-# dependencies
-node_modules/
-
 # build output
 dist/
 .astro/
 .vercel/
 .output/
 
+# dependencies
+node_modules/
+
 # environment
 .env
 .env.local
+.env.production
 .env.*.local
 
 # logs
 *.log
 npm-debug.log*
-pnpm-debug.log*
 yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # editor
 .vscode/
 .idea/
+*.tsbuildinfo
+
+# OS
 .DS_Store
 
-# misc
-*.tsbuildinfo
+# notion-downloaded assets — regenerated deterministically from Notion on each build
+public/notion-assets/

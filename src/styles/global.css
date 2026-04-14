@@ -1,0 +1,290 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* ============================================================
+   WindScroll — theme tokens
+   ============================================================ */
+
+@layer base {
+  /* minimal (default) — 中性灰，裸系统字体，用于对照 */
+  :root,
+  [data-theme="minimal"] {
+    --color-bg: #fafafa;
+    --color-surface: #ffffff;
+    --color-text: #171717;
+    --color-muted: #737373;
+    --color-faint: #a3a3a3;
+    --color-accent: #404040;
+    --color-border: #e5e5e5;
+    --color-rule: #e5e5e5;
+    --font-display: ui-serif, "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+    --font-body: ui-serif, "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+    --font-ui: ui-sans-serif, "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --content-size: 1rem;
+    --content-leading: 1.7;
+    --display-tracking: -0.01em;
+  }
+
+  /* anthropic — warm cream + terracotta, Fraunces + Geist + 中文按 data-zh 切 */
+  [data-theme="anthropic"] {
+    --color-bg: #F5F4EF;
+    --color-surface: #FAF9F5;
+    --color-text: #1C1B1A;
+    --color-muted: #6B6862;
+    --color-faint: #A39F95;
+    --color-accent: #CC785C;
+    --color-accent-soft: #E5C9BE;
+    --color-border: #E5E1D6;
+    --color-rule: #DED9CB;
+    /* default Chinese = wenkai (会被 [data-zh] 覆盖) */
+    --font-display: "Fraunces", "LXGW WenKai", "Iowan Old Style", Georgia, serif;
+    --font-body: "Fraunces", "LXGW WenKai", "Iowan Old Style", Georgia, serif;
+    --font-ui: "Geist", "Noto Sans SC", "PingFang SC", system-ui, -apple-system, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --content-size: 1.0625rem;
+    --content-leading: 1.78;
+    --display-tracking: -0.025em;
+  }
+
+  /* CHINESE_FONT = wenkai (LXGW 霞鹜文楷) */
+  [data-theme="anthropic"][data-zh="wenkai"] {
+    --font-display: "Fraunces", "LXGW WenKai", "Iowan Old Style", Georgia, serif;
+    --font-body: "Fraunces", "LXGW WenKai", "Iowan Old Style", Georgia, serif;
+  }
+
+  /* CHINESE_FONT = songti (思源宋体) */
+  [data-theme="anthropic"][data-zh="songti"] {
+    --font-display: "Fraunces", "Noto Serif SC", "Songti SC", "Iowan Old Style", Georgia, serif;
+    --font-body: "Fraunces", "Noto Serif SC", "Songti SC", "Iowan Old Style", Georgia, serif;
+  }
+
+  html {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-ui);
+    font-feature-settings: "kern", "liga", "calt", "ss01";
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-soft, #d4d4d4);
+    color: var(--color-text);
+  }
+}
+
+/* ============================================================
+   Theme-aware utilities
+   ============================================================ */
+
+@layer utilities {
+  .text-ink      { color: var(--color-text); }
+  .text-muted    { color: var(--color-muted); }
+  .text-faint    { color: var(--color-faint); }
+  .text-accent   { color: var(--color-accent); }
+  .bg-surface    { background-color: var(--color-surface); }
+  .bg-page       { background-color: var(--color-bg); }
+  .border-hairline { border-color: var(--color-border); }
+  .border-rule   { border-color: var(--color-rule); }
+  .font-display  { font-family: var(--font-display); }
+  .font-body     { font-family: var(--font-body); }
+  .font-ui       { font-family: var(--font-ui); }
+  .font-mono-local { font-family: var(--font-mono); }
+}
+
+/* ============================================================
+   Display type — Fraunces fine-tuning
+   ============================================================ */
+
+[data-theme="anthropic"] .display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 0;
+  font-weight: 400;
+  letter-spacing: var(--display-tracking);
+  line-height: 1.05;
+}
+
+[data-theme="anthropic"] .display-sm {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "opsz" 72, "SOFT" 30;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+[data-theme="anthropic"] .lead {
+  font-family: var(--font-body);
+  font-variation-settings: "opsz" 14;
+  font-weight: 400;
+  font-size: 1.1875rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+/* UI labels in sidebar, nav — slightly spread, lowercase-capable */
+.label {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+}
+
+.label-value {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+/* ============================================================
+   Prose (article body)
+   ============================================================ */
+
+.prose {
+  --tw-prose-body: var(--color-text);
+  --tw-prose-headings: var(--color-text);
+  --tw-prose-lead: var(--color-muted);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-text);
+  --tw-prose-counters: var(--color-muted);
+  --tw-prose-bullets: var(--color-faint);
+  --tw-prose-hr: var(--color-rule);
+  --tw-prose-quotes: var(--color-text);
+  --tw-prose-quote-borders: var(--color-accent);
+  --tw-prose-captions: var(--color-muted);
+  --tw-prose-code: var(--color-text);
+  --tw-prose-pre-code: #e5e5e5;
+  --tw-prose-pre-bg: #1a1a1a;
+  --tw-prose-th-borders: var(--color-border);
+  --tw-prose-td-borders: var(--color-border);
+  font-family: var(--font-body);
+  font-size: var(--content-size);
+  line-height: var(--content-leading);
+  max-width: none;
+}
+
+[data-theme="anthropic"] .prose {
+  font-variation-settings: "opsz" 14, "SOFT" 30;
+}
+
+[data-theme="anthropic"] .prose h1,
+[data-theme="anthropic"] .prose h2,
+[data-theme="anthropic"] .prose h3,
+[data-theme="anthropic"] .prose h4 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 60, "SOFT" 30;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+[data-theme="anthropic"] .prose h2 {
+  font-size: 1.6rem;
+  margin-top: 2.4em;
+  margin-bottom: 0.6em;
+}
+
+[data-theme="anthropic"] .prose h3 {
+  font-size: 1.25rem;
+  margin-top: 1.8em;
+}
+
+[data-theme="anthropic"] .prose p,
+[data-theme="anthropic"] .prose li {
+  font-variation-settings: "opsz" 14;
+}
+
+[data-theme="anthropic"] .prose a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--color-accent-soft);
+  transition: text-decoration-color 0.2s;
+}
+
+[data-theme="anthropic"] .prose a:hover {
+  text-decoration-color: var(--color-accent);
+}
+
+[data-theme="anthropic"] .prose blockquote {
+  font-style: normal;
+  border-left-width: 2px;
+  padding-left: 1.25em;
+  color: var(--color-muted);
+}
+
+[data-theme="anthropic"] .prose code {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.9em;
+  background: var(--color-surface);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  border: 1px solid var(--color-border);
+}
+
+[data-theme="anthropic"] .prose :where(code):not(:where([class~="not-prose"] *))::before,
+[data-theme="anthropic"] .prose :where(code):not(:where([class~="not-prose"] *))::after {
+  content: "";
+}
+
+[data-theme="anthropic"] .prose pre {
+  border-radius: 6px;
+  padding: 1.1em 1.25em;
+  font-size: 0.85em;
+  line-height: 1.7;
+  border: 1px solid #252525;
+}
+
+[data-theme="anthropic"] .prose pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-weight: 400;
+}
+
+[data-theme="anthropic"] .prose img {
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+[data-theme="anthropic"] .prose hr {
+  margin-top: 3em;
+  margin-bottom: 3em;
+}
+
+/* ============================================================
+   Decorative rule — thin with a dot
+   ============================================================ */
+
+.rule-dot {
+  position: relative;
+  height: 1px;
+  background: var(--color-rule);
+}
+
+.rule-dot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-accent);
+  transform: translate(-50%, -50%);
+}

@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getEntry, render } from 'astro:content';
+
+const about = await getEntry('pages', 'about');
+if (!about) {
+  throw new Error('About page not found in Notion (pages collection, slug=about)');
+}
+const { Content } = await render(about);
+---
+
+<Layout title="about" description={about.data.summary}>
+  <main class="mx-auto max-w-2xl px-6">
+    <header class="pt-20 pb-12">
+      <div class="label">hello</div>
+      <h1 class="display mt-3 text-[clamp(2.4rem,5vw,4rem)] text-ink">
+        {about.data.title}
+      </h1>
+    </header>
+
+    <div class="mb-12 rule-dot"></div>
+
+    <article class="prose">
+      <Content />
+    </article>
+  </main>
+</Layout>

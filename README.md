@@ -4,6 +4,8 @@
 
 🔗 Live demo：**[blog.wind.wiki](https://blog.wind.wiki)**
 
+![WindScroll 首页](docs/screenshots/home.png)
+
 ---
 
 ## 这是什么
@@ -28,6 +30,8 @@ NotionNext 的根本问题：
 - 主题系统反而把样式锁在它的抽象里，自定义细节非常累
 
 WindScroll 走完全相反的路线：**官方 API + 极简代码 + 完全自主的样式层**。
+
+![文章详情页](docs/screenshots/post.png)
 
 ## 技术栈
 

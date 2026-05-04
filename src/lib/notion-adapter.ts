@@ -32,6 +32,7 @@ export interface SiteConfig {
   lang: string;
   since: number;
   favicon: string | null;
+  wechatQr: string | null;
   theme: ThemeName;
   chineseFont: ChineseFont;
 }
@@ -47,6 +48,7 @@ const DEFAULT_CONFIG: SiteConfig = {
   lang: 'zh-CN',
   since: new Date().getFullYear(),
   favicon: null,
+  wechatQr: null,
   theme: 'anthropic',
   chineseFont: 'wenkai',
 };
@@ -305,12 +307,20 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
   } while (cursor);
 
   const kv: Record<string, string> = {};
+  const kvImage: Record<string, string> = {};
   for (const row of rows) {
     if (!row.properties['启用']?.checkbox) continue;
     const key = plainText(row.properties['配置名']?.title).trim();
+    if (!key) continue;
     const value = plainText(row.properties['配置值']?.rich_text).trim();
-    if (key) kv[key] = value;
+    if (value) kv[key] = value;
+    const file = row.properties['配置图片']?.files?.[0];
+    const fileUrl = file?.type === 'external' ? file.external?.url : file?.file?.url;
+    if (fileUrl) kvImage[key] = await localizeImage(fileUrl);
   }
+
+  const pickImage = (key: string): string | null =>
+    kvImage[key] || kv[key] || null;
 
   return {
     author: kv.AUTHOR || DEFAULT_CONFIG.author,
@@ -322,7 +332,8 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
     keywords: (kv.KEYWORDS || '').split(',').map((s) => s.trim()).filter(Boolean),
     lang: kv.LANG || DEFAULT_CONFIG.lang,
     since: kv.SINCE ? parseInt(kv.SINCE, 10) : DEFAULT_CONFIG.since,
-    favicon: kv.BLOG_FAVICON || DEFAULT_CONFIG.favicon,
+    favicon: pickImage('BLOG_FAVICON'),
+    wechatQr: pickImage('CONTACT_WECHAT_QR'),
     theme: normalizeTheme(kv.THEME),
     chineseFont: normalizeChineseFont(kv.CHINESE_FONT),
   };

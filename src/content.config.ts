@@ -107,6 +107,7 @@ const config = defineCollection({
     lang: z.string(),
     since: z.number(),
     favicon: z.string().nullable(),
+    wechatQr: z.string().nullable(),
     theme: z.enum(['anthropic', 'minimal']),
     chineseFont: z.enum(['wenkai', 'songti']),
   }),

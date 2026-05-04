@@ -241,4 +241,6 @@ P2（先想清楚再做）：
 
 这是个人博客引擎，欢迎 fork 改成你自己的，但**不接受 PR 加主题系统 / 插件系统 / 通用化抽象** —— 这违反项目设计信条。Bug 修复和文档改进的 PR 欢迎。
 
-License：MIT
+License：[MIT](./LICENSE)
+
+> 注：本仓库的代码以 MIT 协议开源，但 [blog.wind.wiki](https://blog.wind.wiki) 上的文章内容版权归 wind 所有，未经授权请勿转载。

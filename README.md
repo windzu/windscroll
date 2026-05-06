@@ -89,63 +89,79 @@ public/
 
 ### 1. 准备 Notion
 
-#### 1.1 建一个 Notion Integration
+#### 1.1 一键 duplicate 模板
+
+打开下面这个公开模板链接，点页面**右上角的 duplicate 图标**（两个方块叠在一起的那个），把整个模板复制到你自己的 Notion workspace：
+
+> 📋 **[WindScroll Notion 模板](https://sincere-pleasure-1f8.notion.site/356e48591fc180119e67cd3606b23b74)**
+
+模板里已经有：
+
+- 一个名为 `WindScroll模板` 的数据库（schema 完整对齐）
+- 3 行示例数据：`Hello WindScroll`（Post）/ `关于`（Page）/ `配置中心`（Config）
+- 配置中心里嵌入的 `CONFIG-TABLE` 子数据库（13 行配置占位符，含图片型配置 `BLOG_FAVICON` / `CONTACT_WECHAT_QR` 的位置）
+
+duplicate 之后你就有了一份完整骨架，只需替换占位内容即可。
+
+复制完，从浏览器地址栏抓你这份新数据库的 ID（URL 形如 `https://www.notion.so/<workspace>/<DATABASE_ID>?v=...`，中间那段 32 位 hex 就是 `DATABASE_ID`），后面要填到 `.env`。
+
+#### 1.2 建一个 Notion Integration 并授权给数据库
 
 1. 打开 https://www.notion.so/my-integrations
-2. 点 **+ New integration**，类型选 **Internal**，所属 workspace 选你自己的
+2. 点 **+ New integration**，类型选 **Internal**，所属 workspace 选你 duplicate 模板那个
 3. 创建后复制 **Internal Integration Token**（`ntn_` 开头）—— 后面要填到 `.env`
+4. 回到 Notion 里你刚 duplicate 出来的数据库 → 右上角 `...` → **Connections** → 选刚才建的 Integration。**这一步必须做**，否则 API 读不到任何内容。
 
-#### 1.2 建博客数据库
+#### 1.3 改配置中心
 
-在 Notion 里新建一个数据库（Full page database），需要以下 properties：
+进 `配置中心` 那行 page → 看到内嵌的 `CONFIG-TABLE` → 把每行的"配置值"换成你自己的（作者名、邮箱、GitHub 链接 …）。
+
+| key | 用途 | 默认 |
+|-----|------|------|
+| `AUTHOR` | 作者名 | `wind` |
+| `BIO` | 一句话简介 | （空） |
+| `GREETING_WORDS` | 首页问候（取逗号分隔的第一个） | （空） |
+| `LINK` | 站点 URL | （空） |
+| `KEYWORDS` | SEO keywords（逗号分隔） | （空） |
+| `LANG` | HTML lang | `zh-CN` |
+| `SINCE` | footer © 起始年份 | 当前年份 |
+| `CONTACT_EMAIL` | 联系邮箱 | （空） |
+| `CONTACT_GITHUB` | GitHub URL | （空） |
+| `THEME` | 主题 | `anthropic` (可选 `minimal`) |
+| `CHINESE_FONT` | 中文字体 | `wenkai` (可选 `songti`) |
+| `BLOG_FAVICON` | favicon 图标 | （空，把图片拖到"配置图片"列） |
+| `CONTACT_WECHAT_QR` | 微信公众号二维码 | （空，把图片拖到"配置图片"列） |
+
+**图片型配置**（favicon / 公众号二维码）填在 `配置图片` 这一列（Files & media 类型），把图片**直接拖进单元格**，Notion 托管，build 时 adapter 自动下载到 `public/notion-assets/` 本地化（规避 Notion signed URL 1h 过期问题）。
+
+不想用配置中心也行，关掉某行的"启用"checkbox 即可，缺失的会走 `DEFAULT_CONFIG`（在 `src/lib/notion-adapter.ts`）。
+
+<details>
+<summary>没用模板，想自己手动建？</summary>
+
+新建一个 Full page database，加以下 properties：
 
 | 属性名 | 类型 | 说明 |
 |--------|------|------|
-| `title` | Title | 文章标题（必填） |
+| `title` | Title | 文章标题（必填，**名称必须是英文 `title`**） |
 | `slug` | Rich text | URL 段，留空会用 page id |
-| `type` | Select | `Post` / `Page` / `Config` 三选一 |
-| `status` | Select | `Published` 才会被收录 |
+| `type` | Select | options: `Post` / `Page` / `Config` |
+| `status` | Select | options: `Published` / `Draft`（adapter 只收 `Published`） |
 | `date` | Date | 发布日期 |
 | `summary` | Rich text | 摘要 |
 | `tags` | Multi-select | 标签 |
 | `category` | Select | 分类 |
 
-复制数据库 URL 里那段 32 位 hex（即 `https://www.notion.so/<workspace>/<DATABASE_ID>?v=...` 中的 `DATABASE_ID`），后面要填到 `.env`。
+然后建配置中心：在数据库里加一行，`type=Config`、`status=Published`、标题"配置中心"。进入这行 page，正文输入 `/database` → 选 `Database - Inline`，名字**必须叫 `CONFIG-TABLE`**（adapter 写死了），schema 是：
 
-#### 1.3 把 Integration 加入数据库
+- `配置名`（Title）
+- `配置值`（Rich text）
+- `配置图片`（Files & media）
+- `启用`（Checkbox）
 
-数据库右上角 `...` → **Connections** → 选刚才建的 Integration。否则 API 读不到。
+参考上面的 key 表填占位行。
 
-#### 1.4 建配置中心（可选但推荐）
-
-WindScroll 把站点的可调参数（作者名 / 简介 / 主题 / 字体 / 邮箱 / GitHub …）放在 Notion 里，改值 → 触发重建 → 全站生效。
-
-做法：
-
-1. 在博客数据库里新建一行，`type=Config`，`status=Published`，标题随意（如"配置中心"）
-2. 进入这行 page，在正文里 `/database` 插入一个**子数据库（inline）**，名字必须叫 **`CONFIG-TABLE`**
-3. 子数据库的 properties：
-   - `配置名`（Title）
-   - `配置值`（Rich text）
-   - `启用`（Checkbox）
-4. 添加配置项（key 见下表，不需要全填，缺的会用默认值）：
-
-| key | 示例值 | 用途 |
-|-----|--------|------|
-| `AUTHOR` | `wind` | 作者名 |
-| `BIO` | `做点想做的事` | 一句话简介 |
-| `GREETING_WORDS` | `欢迎,Hello` | 首页问候（取第一个） |
-| `LINK` | `https://blog.wind.wiki` | 站点 URL |
-| `KEYWORDS` | `blog,tech,notes` | SEO keywords |
-| `LANG` | `zh-CN` | HTML lang |
-| `SINCE` | `2020` | footer © 起始年份 |
-| `BLOG_FAVICON` | `/favicon.svg` | favicon 路径 |
-| `CONTACT_EMAIL` | `you@example.com` | 联系邮箱 |
-| `CONTACT_GITHUB` | `https://github.com/you` | GitHub URL |
-| `THEME` | `anthropic` | `anthropic` / `minimal` |
-| `CHINESE_FONT` | `wenkai` | `wenkai` / `songti` |
-
-不想用配置中心也行，全部走 `DEFAULT_CONFIG`（在 `src/lib/notion-adapter.ts`）即可。
+</details>
 
 ### 2. 本地跑通
 
@@ -157,7 +173,7 @@ pnpm install
 # 配置环境变量
 cat > .env <<EOF
 NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-NOTION_DATABASE_ID=2fe69852a1518195a9f1f992cc90f4e8
+NOTION_DATABASE_ID=<你 duplicate 出的数据库 ID，32 位 hex>
 EOF
 
 pnpm dev    # 冷启动约 90s（首次拉 Notion）
